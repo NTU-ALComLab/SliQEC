@@ -9,11 +9,11 @@ CXX = g++
 
 all: 
 	cd cudd && $(MAKE)
-	$(CXX) src/*.cpp -o SliQPEC $(CFLAGS) $(LFLAGS)
+	$(CXX) src/*.cpp -o SliQEC $(CFLAGS) $(LFLAGS)
 
 .PHONY: clean
 
 clean:
 	cd cudd && $(MAKE) clean
-	rm -f SliQSim
+	rm -f SliQEC
  
