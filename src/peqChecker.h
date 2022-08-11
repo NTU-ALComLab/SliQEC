@@ -8,7 +8,8 @@ class PartialEquivalenceChecker : public BDDSystem
 public:
     // constructor and destructor
     PartialEquivalenceChecker(std::string circuit1Str, std::string circuit2Str, int nQubitIn, int nQibitOut, int r, bool isReorder);
-    ~PartialEquivalenceChecker()  {
+    ~PartialEquivalenceChecker()  
+    {
         clear();
     }
 
@@ -24,18 +25,18 @@ private:
     int _ratio; // gatecount ratio: |G_p|/|G|
     bool _isPEC;
 
-    void setupDD(bool special);
+    void init(bool special);
     void invertCircuit(std::vector<GateType> &gate);
-    void initBaseBDD();
     void calculateMiter();
     void applyGate(int ithCircuit, GateType type, std::vector<int> &qubit, bool right);
-    bool checkPEC();
-    bool checkPECSpecial();
-    void getResult(bool special);
+    void checkPEC();
+    void checkPECSpecial();
+    void printResult(bool special);
     void extract(int ithCircuit);
 
     // Clean up EquivalenceChecker
-    void clear() {
+    void clear() 
+    {
         _gates[0].clear();
         _gates[1].clear();
         _gates.clear();

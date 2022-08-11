@@ -46,7 +46,7 @@ PartialEquivalenceChecker::PartialEquivalenceChecker
 
 ***********************************************************************/
 
-void PartialEquivalenceChecker::setupDD(bool special){
+void PartialEquivalenceChecker::init(bool special){
     if (!special)
     {
         int nAncilla = _n - _nInput;
@@ -55,10 +55,8 @@ void PartialEquivalenceChecker::setupDD(bool special){
         }
     }
 
-
-    _ddManager = Cudd_Init(2*_n, 2*_n, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0); // 0~(n-1): 0-variables, n~(2n-1): 1-variables
+    ddInitialize();
     initIdentity();
-    initBaseBDD();
 }
 
 
@@ -87,23 +85,6 @@ void PartialEquivalenceChecker::invertCircuit(std::vector<GateType> &gate)
         else if (gate[i] == GateType::RY_PI_2) gate[i] = GateType::RY_PI_2_DG;
         else if (gate[i] == GateType::RY_PI_2_DG) gate[i] = GateType::RY_PI_2;
     }
-}
-
-/**Function*************************************************************
-
-  Synopsis    [initilize zero BDD for checking]
-
-  Description []
-
-  SideEffects []
-
-  SeeAlso     []
-
-***********************************************************************/
-void PartialEquivalenceChecker::initBaseBDD()
-{
-    _zeroNode = Cudd_Not(Cudd_ReadOne(_ddManager));
-    Cudd_Ref(_zeroNode);
 }
 
 /**Function*************************************************************
@@ -344,7 +325,7 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
 ***********************************************************************/
 
-bool PartialEquivalenceChecker::checkPEC(){
+void PartialEquivalenceChecker::checkPEC(){
     if ( (_k[0]-_k[1])%2 != 0){   // _k[0] - _k[1] must be even for two matrices to be equivalent
         assert(false);
         // this condition should not appear, because each gate will be applied pairwisely in (U^-1)U
@@ -365,19 +346,24 @@ bool PartialEquivalenceChecker::checkPEC(){
     for(int i = 0; i < _w; i++){
         for (int j = 0; j < dk; j++){
             if (_allBDD[small][i][_r - dk + j] != _allBDD[small][i][_r - dk - 1]){     // for 1's complement, the higher bits should be filled with the same bit
-                return false;
+                _isPEC = false;
+                return;
             }
             if (_allBDD[large][i][j] != _zeroNode){
-                return false;
+                _isPEC = false;
+                return;
             }
         }
         for (int j = 0; j < _r - dk; j++){
             if (_allBDD[small][i][j] != _allBDD[large][i][j + dk]){
-                return false;
+                _isPEC = false;
+                return;
             }
         }
     }
-    return true;
+
+    _isPEC = true;
+    return;
 }
 
 /**Function*************************************************************
@@ -392,7 +378,7 @@ bool PartialEquivalenceChecker::checkPEC(){
 
 ***********************************************************************/
 
-bool PartialEquivalenceChecker::checkPECSpecial(){
+void PartialEquivalenceChecker::checkPECSpecial(){
     DdNode *mask = _zeroNode;
     Cudd_Ref(mask);
     for (int index = 0; index < _nOutput; index++){
@@ -421,13 +407,15 @@ bool PartialEquivalenceChecker::checkPECSpecial(){
             if (temp != _zeroNode){
                 Cudd_RecursiveDeref(_ddManager, mask);
                 Cudd_RecursiveDeref(_ddManager, temp);
-                return false;
+                _isPEC = false;
+                return;
             }
             Cudd_RecursiveDeref(_ddManager, temp);
         }
     }
     Cudd_RecursiveDeref(_ddManager, mask);
-    return true;
+    _isPEC = true;
+    return;
 }
 
 /**Function*************************************************************
@@ -441,7 +429,7 @@ bool PartialEquivalenceChecker::checkPECSpecial(){
   SeeAlso     []
 
 ***********************************************************************/
-void PartialEquivalenceChecker::getResult(bool special)
+void PartialEquivalenceChecker::printResult(bool special)
 {
     std::cout << std::endl;
     std::cout << "  #Qubits: " << _n << std::endl;
@@ -471,11 +459,11 @@ void PartialEquivalenceChecker::getResult(bool special)
 ***********************************************************************/
 void PartialEquivalenceChecker::runPEC()
 {
-    setupDD(false);
+    init(false);
     extract(0);
     extract(1);
-    _isPEC = checkPEC();
-    getResult(0);
+    checkPEC();
+    printResult(0);
 }
 
 /**Function*************************************************************
@@ -495,10 +483,10 @@ void PartialEquivalenceChecker::runPECSpecial()
         std::cout << "all qubits should be input qubits in the special case\n";
     assert(_n == _nInput);
 
-    setupDD(true);
+    init(true);
     calculateMiter();
-    _isPEC = checkPECSpecial();
-    getResult(1);
+    checkPECSpecial();
+    printResult(1);
 }
 
 

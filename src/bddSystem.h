@@ -64,6 +64,7 @@ private:
     unsigned long _nodeCount;   // node count
 
     /* misc.cpp */
+    void ddInitialize();
     void initIdentity();
     void allocBDD(DdNode ***Bdd, bool extend);
     int overflow3(DdNode *g, DdNode *h, DdNode *crin);

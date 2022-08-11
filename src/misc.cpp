@@ -2,6 +2,25 @@
 
 /**Function*************************************************************
 
+  Synopsis    [initialize BDD manager and zero node]
+
+  Description []
+
+  SideEffects []
+
+  SeeAlso     []
+
+***********************************************************************/
+void BDDSystem::ddInitialize()
+{
+    _ddManager = Cudd_Init(2*_n, 2*_n, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0); // 0~(n-1): 0-variables, n~(2n-1): 1-variables
+
+    _zeroNode = Cudd_Not(Cudd_ReadOne(_ddManager));
+    Cudd_Ref(_zeroNode);
+}
+
+/**Function*************************************************************
+
   Synopsis    [initialize an identity matrix represented by BDDs]
 
   Description []
