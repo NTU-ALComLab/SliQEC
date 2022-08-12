@@ -24,12 +24,13 @@
 class BDDSystem
 {
 
-friend class PartialEquivalenceChecker;
+friend class EquivalenceChecker;
 
 public:
     // constructor and destructor
     BDDSystem(int nCircuit, int r, bool isReorder)
-    : _nCircuit(nCircuit), _n(0), _r(r), _w(4), _inc(3), _nodeCount(0), _gateCount(0), _isReorder(isReorder)
+    :   _ddManager(nullptr), _allBDD(nullptr), _zeroNode(nullptr), _identityNode(nullptr),
+        _k(0), _nCircuit(nCircuit), _n(0), _r(r), _w(4), _inc(3), _isReorder(isReorder), _gateCount(0), _nodeCount(0)
     {}
 
     ~BDDSystem()  
@@ -53,6 +54,7 @@ private:
     DdManager *_ddManager;      // BDD manager
     DdNode ****_allBDD;         // BDDs [circuit_index][w=4][r]
     DdNode *_zeroNode;          // zero node in BDD 
+    DdNode *_identityNode;      // pointer to the root node of identity BDD
     int *_k;                    // k in algebraic representation
     int _nCircuit;              // # of circuits
     int _n;                     // # of qubits
@@ -67,8 +69,8 @@ private:
     void ddInitialize();
     void initIdentity();
     void allocBDD(DdNode ***Bdd, bool extend);
-    int overflow3(DdNode *g, DdNode *h, DdNode *crin);
-    int overflow2(DdNode *g, DdNode *crin);
+    int overflow3(DdNode *g, DdNode *h, DdNode *crin) const;
+    int overflow2(DdNode *g, DdNode *crin) const;
     void updateNodeCount();
 
     // clean up BDD system

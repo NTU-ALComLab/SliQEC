@@ -78,7 +78,13 @@ void BDDSystem::initIdentity()
                     Cudd_RecursiveDeref(_ddManager, _allBDD[ithCircuit][_w - 1][i]);
                     _allBDD[ithCircuit][_w - 1][i] = tmp1;
                 }
-            }
+
+                if(ithCircuit == 0)
+                {
+                    _identityNode = _allBDD[ithCircuit][_w - 1][i];
+                    Cudd_Ref(_identityNode);
+                }
+             }
             else
             {
                 for (int j = 0; j < _w; j++)
@@ -148,7 +154,8 @@ void BDDSystem::allocBDD(DdNode ***Bdd, bool extend)
   SeeAlso     []
 
 ***********************************************************************/
-int BDDSystem::overflow3(DdNode *g, DdNode *h, DdNode *crin){
+int BDDSystem::overflow3(DdNode *g, DdNode *h, DdNode *crin) const
+{
     DdNode *tmp, *dd1, *dd2;
     int overflow;
 
@@ -183,7 +190,8 @@ int BDDSystem::overflow3(DdNode *g, DdNode *h, DdNode *crin){
   SeeAlso     []
 
 ***********************************************************************/
-int BDDSystem::overflow2(DdNode *g, DdNode *crin){
+int BDDSystem::overflow2(DdNode *g, DdNode *crin) const
+{
     DdNode *tmp;
     int overflow;
 

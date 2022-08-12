@@ -1,27 +1,29 @@
-#include "peqChecker.h"
+#include "eqChecker.h"
 
-extern int qasmParser(std::string &fileStr, std::vector<GateType> &gates, std::vector<std::vector<int> > &qubits, int &n);
-
-PartialEquivalenceChecker::PartialEquivalenceChecker
+EquivalenceChecker::EquivalenceChecker
 (
-    std::string circuit1Str, 
-    std::string circuit2Str, 
-    int nQubitIn, 
-    int nQubitOut, 
+    std::vector<std::vector<GateType>>& gates,
+    std::vector<std::vector<std::vector<int>>>& qubits,
+    int n,
+    int nQin, 
+    int nQout, 
     int r, 
-    bool isReorder
+    bool isReorder,
+    EqType eqType
 )
-:   BDDSystem(2, r, isReorder)
+:   BDDSystem
+    ( 
+        (eqType == EqType::Peq)? 2 : 1, // nCircuit
+        r, 
+        isReorder
+    )
 {
-    _nInput = nQubitIn;
-    _nOutput = nQubitOut;
-
-    _gates.resize(2);
-    _qubits.resize(2);
-    int nQubit1 = qasmParser(circuit1Str, _gates[0], _qubits[0], _n);
-    int nQubit2 = qasmParser(circuit2Str, _gates[1], _qubits[1], _n);
-
-    assert(nQubit1 >= _nInput && nQubit1 >= _nOutput && nQubit2 >= _nInput && nQubit2 >= _nOutput);
+    _gates = gates;
+    _qubits = qubits;
+    _n = n;
+    _nQin = nQin;
+    _nQout = nQout;
+    _eqType = eqType;
 
     // the longer circuit (in gatecount) is stored in gates[1]
     if (_gates[0].size() > _gates[1].size())
@@ -36,7 +38,7 @@ PartialEquivalenceChecker::PartialEquivalenceChecker
 
 /**Function*************************************************************
 
-  Synopsis    [setup BDDs]
+  Synopsis    [Run the checking procedure.]
 
   Description []
 
@@ -45,24 +47,31 @@ PartialEquivalenceChecker::PartialEquivalenceChecker
   SeeAlso     []
 
 ***********************************************************************/
-
-void PartialEquivalenceChecker::init(bool special){
-    if (!special)
+void EquivalenceChecker::check()
+{
+    init();
+    if(_eqType == EqType::Peq)
     {
-        int nAncilla = _n - _nInput;
-        if (_nOutput > nAncilla){
-            _n += _nOutput - nAncilla;
-        }
+        extract(0);
+        extract(1);
+        checkPeq();
     }
-
-    ddInitialize();
-    initIdentity();
+    else if(_eqType == EqType::PeqS)
+    {
+        calculateMiter();
+        checkPeqS();
+    }
+    else if(_eqType == EqType::Feq)
+    {
+        calculateMiter();
+        checkFeq();
+    }
+    printResult();
 }
-
 
 /**Function*************************************************************
 
-  Synopsis    [invert the gates in the given circuit]
+  Synopsis    [Invert the gates in the given circuit]
 
   Description []
 
@@ -72,7 +81,7 @@ void PartialEquivalenceChecker::init(bool special){
 
 ***********************************************************************/
 
-void PartialEquivalenceChecker::invertCircuit(std::vector<GateType> &gate)
+void EquivalenceChecker::invertCircuit(std::vector<GateType> &gate)
 {
     for (int i = 0; i < gate.size(); i++)
     {
@@ -89,44 +98,29 @@ void PartialEquivalenceChecker::invertCircuit(std::vector<GateType> &gate)
 
 /**Function*************************************************************
 
-  Synopsis    [Simulate the miter]
+  Synopsis    [Initialize]
 
-  Description [
-               Apply gates in G and G' to evolve matrx from identity interleavingly.
-               The longer gateuit (gates[1]) is seen as G (applied to the left side of the matrix)
-               to save computation overhead
-              ]
+  Description []
 
   SideEffects []
 
   SeeAlso     []
 
 ***********************************************************************/
-void PartialEquivalenceChecker::calculateMiter()
+
+void EquivalenceChecker::init()
 {
-    int cntCir0 = 0, cntCir1 = 0;
-
-    if (_isReorder) Cudd_AutodynEnable(_ddManager, CUDD_REORDER_SYMM_SIFT);
-
-    invertCircuit(_gates[1]);
-    while (cntCir0 < _gates[0].size() || cntCir1 < _gates[1].size())
+    if (_eqType == EqType::PeqS)
     {
-        // apply 1 gate from gates[0]
-        if (cntCir0 < _gates[0].size())
+        int nAncilla = _n - _nQin;
+        if (_nQout > nAncilla)
         {
-            applyGate(0, _gates[0][cntCir0], _qubits[0][cntCir0], false);
-            cntCir0++;
-        }
-        // apply ratio gate(s) from gates[1]
-        while(  cntCir1 * _gates[0].size() < cntCir0 * _gates[1].size()  &&  cntCir1 < _gates[1].size()   )  
-        {
-            applyGate(0, _gates[1][cntCir1], _qubits[1][cntCir1], true);
-            cntCir1++;
+            _n += _nQout - nAncilla;
         }
     }
-    invertCircuit(_gates[1]);
 
-    if (_isReorder) Cudd_AutodynDisable(_ddManager);
+    ddInitialize();
+    initIdentity();
 }
 
 /**Function*************************************************************
@@ -140,18 +134,8 @@ void PartialEquivalenceChecker::calculateMiter()
   SeeAlso     []
 
 ***********************************************************************/
-void PartialEquivalenceChecker::applyGate(int ithCircuit, GateType type, std::vector<int> qubit, bool right)
+void EquivalenceChecker::applyGate(int ithCircuit, GateType type, std::vector<int> qubit, bool right)
 {
-    /*
-    std::cout<<type<<"========="<<gatecount<<"=============================\n";
-    for(int i=0; i<w; i++){
-        for(int j=0; j<r;j++){
-            std::cout<<i<<" "<<j<<"\n";
-            Cudd_PrintMinterm(_ddManager, _allBDD[0][i][j]);
-            std::cout<<"--\n";
-            Cudd_PrintMinterm(_ddManager, _allBDD[1][i][j]);
-        }
-    }*/
     if (right) for (int i = 0; i < qubit.size(); i++) qubit[i] += _n;
 
     if (type == GateType::X) PauliX(ithCircuit, qubit[0]);
@@ -203,6 +187,48 @@ void PartialEquivalenceChecker::applyGate(int ithCircuit, GateType type, std::ve
 
 /**Function*************************************************************
 
+  Synopsis    [Calculate the miter]
+
+  Description [
+               Apply gates in G and G' to evolve matrx from identity interleavingly.
+               The longer gateuit (gates[1]) is seen as G (applied to the left side of the matrix)
+               to save computation overhead
+              ]
+
+  SideEffects []
+
+  SeeAlso     []
+
+***********************************************************************/
+void EquivalenceChecker::calculateMiter()
+{
+    int cntCir0 = 0, cntCir1 = 0;
+
+    if (_isReorder) Cudd_AutodynEnable(_ddManager, CUDD_REORDER_SYMM_SIFT);
+
+    invertCircuit(_gates[1]);
+    while (cntCir0 < _gates[0].size() || cntCir1 < _gates[1].size())
+    {
+        // apply 1 gate from gates[0]
+        if (cntCir0 < _gates[0].size())
+        {
+            applyGate(0, _gates[0][cntCir0], _qubits[0][cntCir0], false);
+            cntCir0++;
+        }
+        // apply ratio gate(s) from gates[1]
+        while(  cntCir1 * _gates[0].size() < cntCir0 * _gates[1].size()  &&  cntCir1 < _gates[1].size()   )  
+        {
+            applyGate(0, _gates[1][cntCir1], _qubits[1][cntCir1], true);
+            cntCir1++;
+        }
+    }
+    invertCircuit(_gates[1]);
+
+    if (_isReorder) Cudd_AutodynDisable(_ddManager);
+}
+
+/**Function*************************************************************
+
   Synopsis    [Extract information]
 
   Description [Extract the information needed to compare between two circuits.]
@@ -213,7 +239,7 @@ void PartialEquivalenceChecker::applyGate(int ithCircuit, GateType type, std::ve
 
 ***********************************************************************/
 
-void PartialEquivalenceChecker::extract(int ithCircuit){
+void EquivalenceChecker::extract(int ithCircuit){
     if (_isReorder) Cudd_AutodynEnable(_ddManager, CUDD_REORDER_SYMM_SIFT);
 
     for(int cntCir = 0; cntCir < _gates[ithCircuit].size(); cntCir ++){
@@ -223,7 +249,7 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
     for(int i = 0; i < _w; i++){
         for(int j = 0; j < _r; j++){
-            for(int variable_1 = _nInput + _n; variable_1 < 2*_n; variable_1++){      // index of 1-variable
+            for(int variable_1 = _nQin + _n; variable_1 < 2*_n; variable_1++){      // index of 1-variable
                 DdNode *temp1, *temp2;
 
                 temp1 = Cudd_Not(Cudd_bddIthVar(_ddManager, variable_1));
@@ -242,9 +268,9 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
     for(int i = 0; i < _w; i++){
         for(int j = 0; j < _r; j++){
-            for(int index = 0; index < _nOutput; index++){
+            for(int index = 0; index < _nQout; index++){
                 int variable_0 = index;                                    // index of 0-variable
-                int variable_1 = _n + (_n - _nOutput + index);                // index of 1-variable
+                int variable_1 = _n + (_n - _nQout + index);                // index of 1-variable
                 DdNode *temp1, *temp2, *temp3;
 
                 temp1 = Cudd_bddXor(_ddManager, Cudd_bddIthVar(_ddManager, variable_0), Cudd_bddIthVar(_ddManager, variable_1));
@@ -267,7 +293,7 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
     for(int i = 0; i < _w; i++){
         for(int j = 0; j < _r; j++){
-            for(int variable_1 = _nInput + _n; variable_1 < (_n - _nOutput) + _n; variable_1++){     // index of 1-variable
+            for(int variable_1 = _nQin + _n; variable_1 < (_n - _nQout) + _n; variable_1++){     // index of 1-variable
                 DdNode *temp1, *temp2;
 
                 temp1 = Cudd_Not(Cudd_bddIthVar(_ddManager, variable_1));
@@ -293,7 +319,7 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
     for(int i = 0; i < _w; i++){
         for(int j = 0; j < _r; j++){
-            for(int variable_0 = _nInput; variable_0 < _n; variable_0++){
+            for(int variable_0 = _nQin; variable_0 < _n; variable_0++){
                 DdNode *temp1, *temp2;
 
                 temp1 = Cudd_Not( Cudd_bddIthVar(_ddManager, variable_0) );
@@ -315,6 +341,34 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
 /**Function*************************************************************
 
+  Synopsis    [Check if two circuits are equivalent]
+
+  Description []
+
+  SideEffects []
+
+  SeeAlso     []
+
+***********************************************************************/
+void EquivalenceChecker::checkFeq()
+{
+    for (int i = 0; i < _w; i++)
+    {
+        for (int j = 0; j < _r; j++)
+        {
+            if(!(_allBDD[0][i][j] == _identityNode || _allBDD[0][i][j] == _zeroNode))
+            {
+                _isEq = 0;
+                return;
+            }
+        }
+    }
+    
+    _isEq = 1;
+}
+
+/**Function*************************************************************
+
   Synopsis    [Check if two circuits are partially equivalent]
 
   Description []
@@ -325,7 +379,8 @@ void PartialEquivalenceChecker::extract(int ithCircuit){
 
 ***********************************************************************/
 
-void PartialEquivalenceChecker::checkPEC(){
+void EquivalenceChecker::checkPeq()
+{
     if ( (_k[0]-_k[1])%2 != 0){   // _k[0] - _k[1] must be even for two matrices to be equivalent
         assert(false);
         // this condition should not appear, because each gate will be applied pairwisely in (U^-1)U
@@ -346,29 +401,29 @@ void PartialEquivalenceChecker::checkPEC(){
     for(int i = 0; i < _w; i++){
         for (int j = 0; j < dk; j++){
             if (_allBDD[small][i][_r - dk + j] != _allBDD[small][i][_r - dk - 1]){     // for 1's complement, the higher bits should be filled with the same bit
-                _isPEC = false;
+                _isEq = false;
                 return;
             }
             if (_allBDD[large][i][j] != _zeroNode){
-                _isPEC = false;
+                _isEq = false;
                 return;
             }
         }
         for (int j = 0; j < _r - dk; j++){
             if (_allBDD[small][i][j] != _allBDD[large][i][j + dk]){
-                _isPEC = false;
+                _isEq = false;
                 return;
             }
         }
     }
 
-    _isPEC = true;
+    _isEq = true;
     return;
 }
 
 /**Function*************************************************************
 
-  Synopsis    [Check if two circuits are partially equivalent -- in the special case]
+  Synopsis    [Check if two circuits are partially equivalent in the special case.]
 
   Description []
 
@@ -378,10 +433,11 @@ void PartialEquivalenceChecker::checkPEC(){
 
 ***********************************************************************/
 
-void PartialEquivalenceChecker::checkPECSpecial(){
+void EquivalenceChecker::checkPeqS()
+{
     DdNode *mask = _zeroNode;
     Cudd_Ref(mask);
-    for (int index = 0; index < _nOutput; index++){
+    for (int index = 0; index < _nQout; index++){
         int variable_0 = index;
         int variable_1 = _n + index;
 
@@ -407,20 +463,20 @@ void PartialEquivalenceChecker::checkPECSpecial(){
             if (temp != _zeroNode){
                 Cudd_RecursiveDeref(_ddManager, mask);
                 Cudd_RecursiveDeref(_ddManager, temp);
-                _isPEC = false;
+                _isEq = false;
                 return;
             }
             Cudd_RecursiveDeref(_ddManager, temp);
         }
     }
     Cudd_RecursiveDeref(_ddManager, mask);
-    _isPEC = true;
+    _isEq = true;
     return;
 }
 
 /**Function*************************************************************
 
-  Synopsis    [Output final result]
+  Synopsis    [Print the final result]
 
   Description []
 
@@ -429,26 +485,23 @@ void PartialEquivalenceChecker::checkPECSpecial(){
   SeeAlso     []
 
 ***********************************************************************/
-void PartialEquivalenceChecker::printResult(bool special)
+void EquivalenceChecker::printResult() const
 {
-    std::cout << std::endl;
     std::cout << "  #Qubits: " << _n << std::endl;
-    std::cout << "  #Input Qubits: " << _nInput << std::endl;
-    std::cout << "  #Output Qubits: " << _nOutput << std::endl;
-    std::cout << "  Gatecount of G : " << _gates[0].size() << std::endl;
-    std::cout << "  Gatecount of G': " << _gates[1].size() << std::endl;
-    printf("  |G'|/|G|: %.2f\n", ((double) _gates[1].size()) / ((double) _gates[0].size()));
-    if (special) std::cout << "  Is partially equivalent? (special case) ";
+    if(_eqType != EqType::Feq) std::cout << "  #Input Qubits: " << _nQin << std::endl;
+    if(_eqType != EqType::Feq) std::cout << "  #Output Qubits: " << _nQout << std::endl;
+    std::cout << "  Gatecount of circuit1 : " << _gates[0].size() << std::endl;
+    std::cout << "  Gatecount of circuit2: " << _gates[1].size() << std::endl;
+    printf("  |circuit2|/|circuit1|: %.2f\n", ((double) _gates[1].size()) / ((double) _gates[0].size()));
+    if(_eqType == EqType::Feq) std::cout << "  Is equivalent? ";
     else std::cout << "  Is partially equivalent? ";
-    if (_isPEC) std::cout << "Yes" << std::endl;
+    if (_isEq) std::cout << "Yes" << std::endl;
     else std::cout << "No" << std::endl;
-    std::cout << std::endl;
 }
-
 
 /**Function*************************************************************
 
-  Synopsis    [Run PEC procedure for the special case]
+  Synopsis    [Print statistics.]
 
   Description []
 
@@ -457,51 +510,7 @@ void PartialEquivalenceChecker::printResult(bool special)
   SeeAlso     []
 
 ***********************************************************************/
-void PartialEquivalenceChecker::runPEC()
-{
-    init(false);
-    extract(0);
-    extract(1);
-    checkPEC();
-    printResult(0);
-}
-
-/**Function*************************************************************
-
-  Synopsis    [Run PEC procedure for the special case]
-
-  Description []
-
-  SideEffects []
-
-  SeeAlso     []
-
-***********************************************************************/
-void PartialEquivalenceChecker::runPECSpecial()
-{
-    if (_n != _nInput)
-        std::cout << "all qubits should be input qubits in the special case\n";
-    assert(_n == _nInput);
-
-    init(true);
-    calculateMiter();
-    checkPECSpecial();
-    printResult(1);
-}
-
-
-/**Function*************************************************************
-
-  Synopsis    [print statistics]
-
-  Description []
-
-  SideEffects []
-
-  SeeAlso     []
-
-***********************************************************************/
-void PartialEquivalenceChecker::printInfo(double runtime, size_t memPeak)
+void EquivalenceChecker::printInfo(double runtime, size_t memPeak) const
 {
     std::cout << "  Runtime: " << runtime << " seconds" << std::endl;
     std::cout << "  Peak memory usage: " << memPeak << " bytes" << std::endl; //unit in bytes

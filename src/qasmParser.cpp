@@ -3,6 +3,7 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
+#include <fstream>
 
 #include "gateType.h"
 
@@ -18,12 +19,14 @@
 
 ***********************************************************************/
 
-int qasmParser(std::string &fileStr, std::vector<GateType> &gates, std::vector<std::vector<int> > &qubits, int &n)
+void qasmParser(std::ifstream &inFile, std::vector<GateType> &gates, std::vector<std::vector<int> > &qubits, int &n)
 {
-    int nQubit;
+    std::stringstream strStream;
+    strStream << inFile.rdbuf();
+    std::string fileStr = strStream.str(); 
+    std::stringstream file_ss(fileStr);
 
     std::string inStr;
-    std::stringstream file_ss(fileStr);
     
     while(getline(file_ss, inStr))
     {
@@ -38,9 +41,7 @@ int qasmParser(std::string &fileStr, std::vector<GateType> &gates, std::vector<s
                 getline(inStr_ss, inStr, '[');
                 getline(inStr_ss, inStr, ']');
                 
-                nQubit = stoi(inStr); 
-                
-                n = std::max(n, nQubit);
+                n = stoi(inStr); 
             }
             else if (inStr == "creg"){;}
             else if (inStr == "OPENQASM"){;}
@@ -229,11 +230,9 @@ int qasmParser(std::string &fileStr, std::vector<GateType> &gates, std::vector<s
                 else
                 {
                     std::cerr << std::endl
-                            << "[Warning]: Syntax \'" << inStr << "\' is not supported in this simulator. The line is ignored ..." << std::endl;
+                            << "[Warning]: Syntax \'" << inStr << "\' is not supported. The line is ignored ..." << std::endl;
                 }
             }
         }
     }
-
-    return nQubit;
 }

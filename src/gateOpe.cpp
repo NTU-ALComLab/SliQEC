@@ -1,4 +1,4 @@
-#include "peqChecker.h"
+#include "bddSystem.h"
 
 void BDDSystem::Toffoli(int ithCircuit, int targ, std::vector<int> cont, std::vector<int> ncont)
 {
