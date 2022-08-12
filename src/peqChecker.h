@@ -28,7 +28,7 @@ private:
     void init(bool special);
     void invertCircuit(std::vector<GateType> &gate);
     void calculateMiter();
-    void applyGate(int ithCircuit, GateType type, std::vector<int> &qubit, bool right);
+    void applyGate(int ithCircuit, GateType type, std::vector<int> qubit, bool right);
     void checkPEC();
     void checkPECSpecial();
     void printResult(bool special);

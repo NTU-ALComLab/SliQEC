@@ -140,7 +140,7 @@ void PartialEquivalenceChecker::calculateMiter()
   SeeAlso     []
 
 ***********************************************************************/
-void PartialEquivalenceChecker::applyGate(int ithCircuit, GateType type, std::vector<int> &qubit, bool right)
+void PartialEquivalenceChecker::applyGate(int ithCircuit, GateType type, std::vector<int> qubit, bool right)
 {
     /*
     std::cout<<type<<"========="<<gatecount<<"=============================\n";
