@@ -2,32 +2,57 @@
 
 ## Introduction
 `SliQEC` is a BDD-based quantum circuit equivalence checker implemented in C/C++ on top of [CUDD](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddIntro.html) package. 
-The circuit format being checked is `OpenQASM` used by IBM's [Qiskit](https://github.com/Qiskit/qiskit), and our gate set supported now contains Pauli-X, Pauli-Y, Pauli-Z, Hadamard, Phase and its inverse, π/8 and its inverse, Rotation-X with phase π/2, Rotation-Y with phase π/2, Controlled-NOT, Controlled-Z, Toffoli, SWAP, and Fredkin.
+The concerned equivalence checking problem includes the full equivalence checking and partial equivalence checking.
+For more details about problem formulations and theories, please refer to the [papers](##Citation).
 
 ## Build
-To build the checker, type 
-```commandline
-make
+To build the checker, type the command at the root directory.
 ```
-at the root directory.
+$ make
+```
 
 ## Execution
-The help message states the details:
+The circuit format being checked is `OpenQASM` used by IBM's [Qiskit](https://github.com/Qiskit/qiskit), and our supported gate set now contains Pauli-X, Pauli-Y, Pauli-Z, Hadamard, Phase and its inverse, π/8 and its inverse, Rotation-X with phase π/2, Rotation-Y with phase π/2, Controlled-NOT, Controlled-Z, Toffoli, SWAP, and Fredkin.
 
-```commandline
+The help message concludes the details for execution:
+
+``` 
 $ ./SliQEC --help
 Options:
   --help                produce help message.
-  --print_info          print statistics such as runtime, memory, etc.
-  --r arg (=32)         integer bit size.
   --reorder arg (=1)    allow variable reordering or not.
-                        0: disable reordering.
-                        1: enable reordering (default option).
-  --p                   toggle conducting partial equivalence checking.
+                        0: disable 1: enable
   --circuit1 arg        1st circuit for equivalence checking.
   --circuit2 arg        2nd circuit for equivalence checking.
-  --nQin arg (=0)       the number of input qubits.
-  --nQout arg (=0)      the number of output qubits.
-  --s                   toggle using algorithm2 for partial equivalence 
-                        checking.
+  --p arg (=0)          conduct full or partial equivalence checking.
+                        0: full 1: partial
+  --nQd arg (=0)        (only for --p 1) the number of data qubits.
+  --nQm arg (=0)        (only for --p 1) the number of measured qubits.
 ```
+
+## Example
+#### Full Equivalence Checking
+For conducting full equivalence checking on [examples/FEC/bv_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_1.qasm) and [examples/FEC/bv_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_2.qasm), execute:
+``` commandline
+./SliQEC --circuit1 examples/FEC/bv_1.qasm --circuit2 examples/FEC/bv_2.qasm
+```
+Then the results will be shown:
+``` 
+{
+	#Qubits (n): 10
+	Gatecount of circuit1: 29
+	Gatecount of circuit2: 62
+	Is equivalent? Yes
+}
+
+Runtime: 0.019328 seconds
+Peak memory usage: 12881920 bytes
+```
+
+#### Partial Equivalence Checking
+## Citation
+
+## Contact
+If you have any questions or suggestions, feel free to [create an issue](https://github.com/NTU-ALComLab/SliQEC/issues), or contact us.
+For full equivalence checking, please contact joey.cywei@gmail.com.
+For partial equivalence checking, please contact  ghdftff542@gmail.com.
