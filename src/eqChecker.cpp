@@ -6,29 +6,29 @@ EquivalenceChecker::EquivalenceChecker
     std::vector<std::vector<GateType>>& gates,
     std::vector<std::vector<std::vector<int>>>& qubits,
     int n,
-    int nQin, 
-    int nQout, 
-    int r, 
+    int nQd, 
+    int nQm, 
     bool isReorder,
     EqType eqType
 )
 :   BDDSystem
     ( 
         (eqType == EqType::Peq)? 2 : 1, // nCircuit
-        r, 
         isReorder
     )
 {
     _gates = gates;
     _qubits = qubits;
     _n = n;
-    _nQin = nQin;
-    _nQout = nQout;
+    _nQd = nQd;
+    _nQm = nQm;
     _eqType = eqType;
+    _isGatesSwap = false;
 
     // the circuit with larger gatecount is stored in gates[1]
     if (_gates[0].size() > _gates[1].size())
     {
+        _isGatesSwap = true;
         _gates[0].swap(_gates[1]);
         _qubits[0].swap(_qubits[1]);
     }
@@ -113,9 +113,9 @@ void EquivalenceChecker::init()
 {
     if (_eqType == EqType::PeqS)
     {
-        int nAncilla = _n - _nQin;
-        if (_nQout > nAncilla)
-            _n += _nQout - nAncilla;
+        int nAncilla = _n - _nQd;
+        if (_nQm > nAncilla)
+            _n += _nQm - nAncilla;
     }
 
     ddInitialize();
@@ -248,7 +248,7 @@ void EquivalenceChecker::extract(int ithCircuit){
     {
         for(int j = 0; j < _r; j++)
         {
-            for(int variable_1 = _nQin + _n; variable_1 < 2*_n; variable_1++)
+            for(int variable_1 = _nQd + _n; variable_1 < 2*_n; variable_1++)
             {        
                 DdNode *temp1, *temp2;
 
@@ -269,10 +269,10 @@ void EquivalenceChecker::extract(int ithCircuit){
     {
         for(int j = 0; j < _r; j++)
         {
-            for(int index = 0; index < _nQout; index++)
+            for(int index = 0; index < _nQm; index++)
             {
                 int variable_0 = index;                                    // index of 0-variable
-                int variable_1 = _n + (_n - _nQout + index);                // index of 1-variable
+                int variable_1 = _n + (_n - _nQm + index);                // index of 1-variable
                 DdNode *temp1, *temp2, *temp3;
 
                 temp1 = Cudd_bddXor(_ddManager, Cudd_bddIthVar(_ddManager, variable_0), Cudd_bddIthVar(_ddManager, variable_1));
@@ -296,7 +296,7 @@ void EquivalenceChecker::extract(int ithCircuit){
     {
         for(int j = 0; j < _r; j++)
         {
-            for(int variable_1 = _nQin + _n; variable_1 < (_n - _nQout) + _n; variable_1++)
+            for(int variable_1 = _nQd + _n; variable_1 < (_n - _nQm) + _n; variable_1++)
             {
                 DdNode *temp1, *temp2;
 
@@ -322,7 +322,7 @@ void EquivalenceChecker::extract(int ithCircuit){
     {
         for(int j = 0; j < _r; j++)
         {
-            for(int variable_0 = _nQin; variable_0 < _n; variable_0++)
+            for(int variable_0 = _nQd; variable_0 < _n; variable_0++)
             {
                 DdNode *temp1, *temp2;
 
@@ -450,7 +450,7 @@ void EquivalenceChecker::checkPeqS()
 {
     DdNode *mask = _zeroNode;
     Cudd_Ref(mask);
-    for (int index = 0; index < _nQout; index++)
+    for (int index = 0; index < _nQm; index++)
     {
         int variable_0 = index;
         int variable_1 = _n + index;
@@ -506,11 +506,10 @@ void EquivalenceChecker::printResult() const
 {
     std::cout << "{\n";
     std::cout << "\t#Qubits (n): " << _n << '\n';
-    if(_eqType != EqType::Feq) std::cout << "\t#Data qubits (d): " << _nQin << '\n';
-    if(_eqType != EqType::Feq) std::cout << "\t#Measured qubits (m): " << _nQout << '\n';
-    std::cout << "\tGatecount of circuit1: " << _gates[0].size() << '\n';
-    std::cout << "\tGatecount of circuit2: " << _gates[1].size() << '\n';
-    printf("\t|circuit2|/|circuit1|: %.2f\n", ((double) _gates[1].size()) / ((double) _gates[0].size()));
+    if(_eqType != EqType::Feq) std::cout << "\t#Data qubits (d): " << _nQd << '\n';
+    if(_eqType != EqType::Feq) std::cout << "\t#Measured qubits (m): " << _nQm << '\n';
+    std::cout << "\tGatecount of circuit1: " << ((_isGatesSwap)? _gates[1].size() : _gates[0].size()) << '\n';
+    std::cout << "\tGatecount of circuit2: " << ((_isGatesSwap)? _gates[0].size() : _gates[1].size()) << '\n';
     if(_eqType == EqType::Feq) std::cout << "\tIs equivalent? ";
     else std::cout << "\tIs partially equivalent? ";
     if (_isEq) std::cout << "Yes" << std::endl;
@@ -534,6 +533,4 @@ void EquivalenceChecker::printInfo(double runtime, size_t memPeak) const
     std::cout << '\n';
     std::cout << "Runtime: " << runtime << " seconds\n";
     std::cout << "Peak memory usage: " << memPeak << " bytes\n"; 
-    std::cout << "Max #Nodes: " << _nodeCount << '\n';
-    std::cout << "Integer bit size: " << _r << std::endl;
 }

@@ -19,9 +19,9 @@ class BDDSystem
 friend class EquivalenceChecker;
 
 public:
-    BDDSystem(int nCircuit, int r, bool isReorder)
+    BDDSystem(int nCircuit, bool isReorder)
     :   _ddManager(nullptr), _allBDD(nullptr), _zeroNode(nullptr), _identityNode(nullptr),
-        _k(0), _nCircuit(nCircuit), _n(0), _r(r), _w(4), _inc(3), _isReorder(isReorder), _nodeCount(0)
+        _k(0), _nCircuit(nCircuit), _n(0), _r(32), _w(4), _inc(3), _isReorder(isReorder), _nodeCount(0)
     {}
 
     ~BDDSystem()  

@@ -14,17 +14,14 @@ int main(int argc, char **argv)
     po::options_description description("Options");
     description.add_options()
     ("help", "produce help message.")
-    ("print_info", "print statistics such as runtime, memory, etc.")
-    ("r", po::value<int>()->default_value(32), "integer bit size.")
     ("reorder", po::value<bool>()->default_value(true), "allow variable reordering or not.\n"
-                                                             "0: disable reordering.\n"
-                                                             "1: enable reordering (default option).")
-    ("p", "toggle conducting partial equivalence checking.")
+                                                             "0: disable 1: enable") 
     ("circuit1", po::value<std::string>()->implicit_value(""), "1st circuit for equivalence checking.")
     ("circuit2", po::value<std::string>()->implicit_value(""), "2nd circuit for equivalence checking.")
-    ("nQin", po::value<int>()->default_value(0), "the number of input qubits.")
-    ("nQout", po::value<int>()->default_value(0), "the number of output qubits.")
-    ("s", "toggle using algorithm2 for partial equivalence checking.")
+    ("p", po::value<bool>()->default_value(false), "conduct full or partial equivalence checking.\n"
+                                                    "0: full 1: partial")
+    ("nQd", po::value<int>()->default_value(0), "(only for --p 1) the number of data qubits.")
+    ("nQm", po::value<int>()->default_value(0), "(only for --p 1) the number of measured qubits.")
     ;
 
     po::variables_map vm;
@@ -33,19 +30,12 @@ int main(int argc, char **argv)
 
     if (vm.count("help") || argc == 1)
     {
-	    std::cout << description << std::endl;
-	    return 1;
+	    std::cout << description;
+	    return 0;
 	}
 
 
     bool isReorder = vm["reorder"].as<bool>();
-
-    int r = vm["r"].as<int>();
-    if(r <= 0)
-    {
-        std::cerr << "r should be a positive integer." << std::endl;
-        return 0;
-    }
 
     // Parse QASM files
     std::vector<std::vector<GateType>> gates(2);
@@ -74,12 +64,13 @@ int main(int argc, char **argv)
 
     n = std::max(nQ1, nQ2);
 
-    int nQin, nQout; 
+    bool p = vm["p"].as<bool>();
     
-
+    int nQd, nQm; 
+    
     EqType eqType;
 
-    if(!vm.count("p"))
+    if(!p)
     {
         if(nQ1 != nQ2)
         {
@@ -89,38 +80,38 @@ int main(int argc, char **argv)
 
         eqType = EqType::Feq;
 
-        nQin = -1;
-        nQout = -1;
+        nQd = -1;
+        nQm = -1;
     }
     else
     {
-        nQin = vm["nQin"].as<int>();
+        nQd = vm["nQd"].as<int>();
         
-        if(nQin < 0)
+        if(nQd < 0)
         {
-            std::cerr << "nQin should be a positive integer." << std::endl;
+            std::cerr << "nQd should be a positive integer." << std::endl;
             return 0;
         }
-        else if(nQin > nQ1 || nQin > nQ2)
+        else if(nQd > nQ1 || nQd > nQ2)
         {
-            std::cerr << "nQin cannot be larger than #qubit in circuit1 and circuit2." << std::endl;
-            return 0;
-        }
-
-        nQout = vm["nQout"].as<int>();
-
-        if(nQout < 0)
-        {
-            std::cerr << "nQout should be a positive integer." << std::endl;
-            return 0;
-        }
-        else if(nQout > nQ1 || nQout > nQ2)
-        {
-            std::cerr << "nQout cannot be larger than #qubit in circuit1 and circuit2." << std::endl;
+            std::cerr << "nQd cannot be larger than #qubit in circuit1 and circuit2." << std::endl;
             return 0;
         }
 
-        if(nQin == n && !vm.count("s"))
+        nQm = vm["nQm"].as<int>();
+
+        if(nQm < 0)
+        {
+            std::cerr << "nQm should be a positive integer." << std::endl;
+            return 0;
+        }
+        else if(nQm > nQ1 || nQm > nQ2)
+        {
+            std::cerr << "nQm cannot be larger than #qubit in circuit1 and circuit2." << std::endl;
+            return 0;
+        }
+
+        if(nQd == n) 
             eqType = EqType::PeqS;
         else
             eqType = EqType::Peq;
@@ -133,7 +124,7 @@ int main(int argc, char **argv)
 
     gettimeofday(&tStart, NULL);
 
-    EquivalenceChecker checker(gates, qubits, n, nQin, nQout, r, isReorder, eqType);
+    EquivalenceChecker checker(gates, qubits, n, nQd, nQm, isReorder, eqType);
 
     checker.check();
 
@@ -143,8 +134,8 @@ int main(int argc, char **argv)
 
     runtime = elapsedTime / 1000.0;
     memPeak = getPeakRSS();
-    if (vm.count("print_info"))
-        checker.printInfo(runtime, memPeak);
+    
+    checker.printInfo(runtime, memPeak);
 
     return 0;
 }

@@ -19,9 +19,8 @@ public:
         std::vector<std::vector<GateType>>& gates,
         std::vector<std::vector<std::vector<int>>>& qubits,
         int n,
-        int nQin, 
-        int nQout, 
-        int r, 
+        int nQd, 
+        int nQm, 
         bool isReorder,
         EqType eqType
     );
@@ -37,10 +36,11 @@ public:
 private:
     std::vector<std::vector<GateType>> _gates;              // gates in circuits. [nCircuit]*[#gate]
     std::vector<std::vector<std::vector<int>>> _qubits;     // ith qubits of gates in circuits. [nCircuit]*[#gates]*[#qubits]
-    int _nQin;                                              // #data qubits. (d in the paper)
-    int _nQout;                                             // #measured qubits. (m in the paper)     
+    int _nQd;                                               // #data qubits. (d in the paper)
+    int _nQm;                                               // #measured qubits. (m in the paper)     
     int _ratio;                                             // gate count ratio. |circuit2|/|circuit1|
     bool _isEq;                                             // if the result is equivalent or not.
+    bool _isGatesSwap;                                      // if circuit1 and circuit2 are swapped.
     EqType _eqType;                                         // the equivalence checking type (Feq/Peq/PeqS)  
 
     void invertCircuit(std::vector<GateType> &gate);
