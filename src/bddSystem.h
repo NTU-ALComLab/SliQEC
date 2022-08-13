@@ -2,17 +2,9 @@
 #define _BDDSYSTEM_H_
 
 #include <iostream>
-#include <stdio.h> 
-#include <unordered_map>
-#include <sys/time.h> 
-#include <fstream> 
-#include <sstream> 
 #include <cstdlib> 
 #include <string> 
-#include <random>
-#include <cmath>
 #include <vector>
-#include <algorithm>
 
 #include "../cudd/cudd/cudd.h"
 #include "../cudd/cudd/cuddInt.h"
@@ -27,10 +19,9 @@ class BDDSystem
 friend class EquivalenceChecker;
 
 public:
-    // constructor and destructor
     BDDSystem(int nCircuit, int r, bool isReorder)
     :   _ddManager(nullptr), _allBDD(nullptr), _zeroNode(nullptr), _identityNode(nullptr),
-        _k(0), _nCircuit(nCircuit), _n(0), _r(r), _w(4), _inc(3), _isReorder(isReorder), _gateCount(0), _nodeCount(0)
+        _k(0), _nCircuit(nCircuit), _n(0), _r(r), _w(4), _inc(3), _isReorder(isReorder), _nodeCount(0)
     {}
 
     ~BDDSystem()  
@@ -51,19 +42,18 @@ public:
     void PauliZ(int ithCircuit, std::vector<int> iqubit); // Z or CZ
 
 private:
-    DdManager *_ddManager;      // BDD manager
-    DdNode ****_allBDD;         // BDDs [circuit_index][w=4][r]
-    DdNode *_zeroNode;          // zero node in BDD 
-    DdNode *_identityNode;      // pointer to the root node of identity BDD
-    int *_k;                    // k in algebraic representation
-    int _nCircuit;              // # of circuits
-    int _n;                     // # of qubits
-    int _r;                     // resolution of integers
-    int _w;                     // # of integers
-    int _inc;                   // add inc BDDs when overflow occurs, used in alloc_BDD
-    bool _isReorder;            // using reorder or not for BDD
-    unsigned long _gateCount;   // gate count
-    unsigned long _nodeCount;   // node count
+    DdManager *_ddManager;      // BDD manager.
+    DdNode ****_allBDD;         // BDDs. [circuit_index][w=4][r]
+    DdNode *_zeroNode;          // pointer to the zero node in BDD.
+    DdNode *_identityNode;      // pointer to the root node of the identity BDD.
+    int *_k;                    // k in algebraic representation.
+    int _nCircuit;              // # of circuits. For Feq/FeqS nCircuit = 1, For Feq/FeqS nCircuit = 2.
+    int _n;                     // # of qubits.
+    int _r;                     // resolution of integers.
+    int _w;                     // # of integers = 4.
+    int _inc;                   // add inc BDDs when overflow occurs, used in allocBDD.
+    bool _isReorder;            // using reorder or not for BDD.
+    unsigned long _nodeCount;   // node count.
 
     /* misc.cpp */
     void ddInitialize();
@@ -73,7 +63,7 @@ private:
     int overflow2(DdNode *g, DdNode *crin) const;
     void updateNodeCount();
 
-    // clean up BDD system
+    // Clean up BDD system
     void clear() 
     {
         for (int i = 0; i < _nCircuit; i++)

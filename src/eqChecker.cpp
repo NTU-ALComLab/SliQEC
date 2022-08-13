@@ -1,5 +1,6 @@
 #include "eqChecker.h"
 
+// Constructor
 EquivalenceChecker::EquivalenceChecker
 (
     std::vector<std::vector<GateType>>& gates,
@@ -25,7 +26,7 @@ EquivalenceChecker::EquivalenceChecker
     _nQout = nQout;
     _eqType = eqType;
 
-    // the longer circuit (in gatecount) is stored in gates[1]
+    // the circuit with larger gatecount is stored in gates[1]
     if (_gates[0].size() > _gates[1].size())
     {
         _gates[0].swap(_gates[1]);
@@ -71,7 +72,7 @@ void EquivalenceChecker::check()
 
 /**Function*************************************************************
 
-  Synopsis    [Invert the gates in the given circuit]
+  Synopsis    [Invert the gates in the given circuit.]
 
   Description []
 
@@ -98,7 +99,7 @@ void EquivalenceChecker::invertCircuit(std::vector<GateType> &gate)
 
 /**Function*************************************************************
 
-  Synopsis    [Initialize]
+  Synopsis    [Initialize checker.]
 
   Description []
 
@@ -114,9 +115,7 @@ void EquivalenceChecker::init()
     {
         int nAncilla = _n - _nQin;
         if (_nQout > nAncilla)
-        {
             _n += _nQout - nAncilla;
-        }
     }
 
     ddInitialize();
@@ -125,7 +124,7 @@ void EquivalenceChecker::init()
 
 /**Function*************************************************************
 
-  Synopsis    [Apply a gate]
+  Synopsis    [Apply a gate.]
 
   Description [Apply a gate to the left side of the matrix if right = 0, the right side otherwise.]
 
@@ -190,8 +189,8 @@ void EquivalenceChecker::applyGate(int ithCircuit, GateType type, std::vector<in
   Synopsis    [Calculate the miter]
 
   Description [
-               Apply gates in G and G' to evolve matrx from identity interleavingly.
-               The longer gateuit (gates[1]) is seen as G (applied to the left side of the matrix)
+               Apply gates in circuit1 and circuit2 to evolve matrx from identity interleavingly.
+               The longer gateuit (gates[1]) is seen as circuit1 (applied to the left side of the matrix)
                to save computation overhead
               ]
 
@@ -229,9 +228,9 @@ void EquivalenceChecker::calculateMiter()
 
 /**Function*************************************************************
 
-  Synopsis    [Extract information]
+  Synopsis    [Extract the information needed to be compared between two circuits.]
 
-  Description [Extract the information needed to compare between two circuits.]
+  Description []
 
   SideEffects []
 
@@ -242,14 +241,15 @@ void EquivalenceChecker::calculateMiter()
 void EquivalenceChecker::extract(int ithCircuit){
     if (_isReorder) Cudd_AutodynEnable(_ddManager, CUDD_REORDER_SYMM_SIFT);
 
-    for(int cntCir = 0; cntCir < _gates[ithCircuit].size(); cntCir ++){
+    for(int cntCir = 0; cntCir < _gates[ithCircuit].size(); cntCir ++)
         applyGate(ithCircuit, _gates[ithCircuit][cntCir], _qubits[ithCircuit][cntCir], 0);
-    }
-    // setup G
 
-    for(int i = 0; i < _w; i++){
-        for(int j = 0; j < _r; j++){
-            for(int variable_1 = _nQin + _n; variable_1 < 2*_n; variable_1++){      // index of 1-variable
+    for(int i = 0; i < _w; i++)
+    {
+        for(int j = 0; j < _r; j++)
+        {
+            for(int variable_1 = _nQin + _n; variable_1 < 2*_n; variable_1++)
+            {        
                 DdNode *temp1, *temp2;
 
                 temp1 = Cudd_Not(Cudd_bddIthVar(_ddManager, variable_1));
@@ -264,11 +264,13 @@ void EquivalenceChecker::extract(int ithCircuit){
             }
         }
     }
-    // cofactor
 
-    for(int i = 0; i < _w; i++){
-        for(int j = 0; j < _r; j++){
-            for(int index = 0; index < _nQout; index++){
+    for(int i = 0; i < _w; i++)
+    {
+        for(int j = 0; j < _r; j++)
+        {
+            for(int index = 0; index < _nQout; index++)
+            {
                 int variable_0 = index;                                    // index of 0-variable
                 int variable_1 = _n + (_n - _nQout + index);                // index of 1-variable
                 DdNode *temp1, *temp2, *temp3;
@@ -289,11 +291,13 @@ void EquivalenceChecker::extract(int ithCircuit){
             }
         }
     }
-    //
 
-    for(int i = 0; i < _w; i++){
-        for(int j = 0; j < _r; j++){
-            for(int variable_1 = _nQin + _n; variable_1 < (_n - _nQout) + _n; variable_1++){     // index of 1-variable
+    for(int i = 0; i < _w; i++)
+    {
+        for(int j = 0; j < _r; j++)
+        {
+            for(int variable_1 = _nQin + _n; variable_1 < (_n - _nQout) + _n; variable_1++)
+            {
                 DdNode *temp1, *temp2;
 
                 temp1 = Cudd_Not(Cudd_bddIthVar(_ddManager, variable_1));
@@ -308,18 +312,18 @@ void EquivalenceChecker::extract(int ithCircuit){
             }
         }
     }
-    //
 
     invertCircuit(_gates[ithCircuit]);
-    for(int cntCir = _gates[ithCircuit].size() - 1; cntCir >= 0 ; cntCir --){
+    for(int cntCir = _gates[ithCircuit].size() - 1; cntCir >= 0 ; cntCir --)
         applyGate(ithCircuit, _gates[ithCircuit][cntCir], _qubits[ithCircuit][cntCir], 0);
-    }
     invertCircuit(_gates[ithCircuit]);
-    // apply G^-1
 
-    for(int i = 0; i < _w; i++){
-        for(int j = 0; j < _r; j++){
-            for(int variable_0 = _nQin; variable_0 < _n; variable_0++){
+    for(int i = 0; i < _w; i++)
+    {
+        for(int j = 0; j < _r; j++)
+        {
+            for(int variable_0 = _nQin; variable_0 < _n; variable_0++)
+            {
                 DdNode *temp1, *temp2;
 
                 temp1 = Cudd_Not( Cudd_bddIthVar(_ddManager, variable_0) );
@@ -334,14 +338,13 @@ void EquivalenceChecker::extract(int ithCircuit){
             }
         }
     }
-    //
 
     if (_isReorder) Cudd_AutodynDisable(_ddManager);
 }
 
 /**Function*************************************************************
 
-  Synopsis    [Check if two circuits are equivalent]
+  Synopsis    [Check if two circuits are fully equivalent.]
 
   Description []
 
@@ -369,7 +372,7 @@ void EquivalenceChecker::checkFeq()
 
 /**Function*************************************************************
 
-  Synopsis    [Check if two circuits are partially equivalent]
+  Synopsis    [Check if two circuits are partially equivalent.]
 
   Description []
 
@@ -381,36 +384,46 @@ void EquivalenceChecker::checkFeq()
 
 void EquivalenceChecker::checkPeq()
 {
-    if ( (_k[0]-_k[1])%2 != 0){   // _k[0] - _k[1] must be even for two matrices to be equivalent
+    // _k[0] - _k[1] must be even for two matrices to be equivalent
+    if ( (_k[0]-_k[1])%2 != 0)          
         assert(false);
         // this condition should not appear, because each gate will be applied pairwisely in (U^-1)U
-    }
+    
 
     int small, large, dk;
-    if (_k[0] >= _k[1]){
+    if (_k[0] >= _k[1])
+    {
         small = 1;
         large = 0;
         dk = (_k[0] - _k[1]) / 2;
     }
-    else{
+    else
+    {
         small = 0;
         large = 1;
         dk = (_k[1] - _k[0]) / 2;
-    }                               // need to consider different k
+    }   // need to consider different k
 
-    for(int i = 0; i < _w; i++){
-        for (int j = 0; j < dk; j++){
-            if (_allBDD[small][i][_r - dk + j] != _allBDD[small][i][_r - dk - 1]){     // for 1's complement, the higher bits should be filled with the same bit
+    for(int i = 0; i < _w; i++)
+    {
+        for (int j = 0; j < dk; j++)
+        {
+            // for 1's complement, the higher bits should be filled with the same bit
+            if (_allBDD[small][i][_r - dk + j] != _allBDD[small][i][_r - dk - 1])
+            {
                 _isEq = false;
                 return;
             }
-            if (_allBDD[large][i][j] != _zeroNode){
+            if (_allBDD[large][i][j] != _zeroNode)
+            {
                 _isEq = false;
                 return;
             }
         }
-        for (int j = 0; j < _r - dk; j++){
-            if (_allBDD[small][i][j] != _allBDD[large][i][j + dk]){
+        for (int j = 0; j < _r - dk; j++)
+        {
+            if (_allBDD[small][i][j] != _allBDD[large][i][j + dk])
+            {
                 _isEq = false;
                 return;
             }
@@ -437,7 +450,8 @@ void EquivalenceChecker::checkPeqS()
 {
     DdNode *mask = _zeroNode;
     Cudd_Ref(mask);
-    for (int index = 0; index < _nQout; index++){
+    for (int index = 0; index < _nQout; index++)
+    {
         int variable_0 = index;
         int variable_1 = _n + index;
 
@@ -454,13 +468,16 @@ void EquivalenceChecker::checkPeqS()
         mask = temp2;
     }
 
-    for(int i = 0; i < _w; i++){
-        for(int j = 0; j < _r; j++){
+    for(int i = 0; i < _w; i++)
+    {
+        for(int j = 0; j < _r; j++)
+        {
             DdNode *temp;
             temp = Cudd_bddAnd(_ddManager, _allBDD[0][i][j], mask);
             Cudd_Ref(temp);
 
-            if (temp != _zeroNode){
+            if (temp != _zeroNode)
+            {
                 Cudd_RecursiveDeref(_ddManager, mask);
                 Cudd_RecursiveDeref(_ddManager, temp);
                 _isEq = false;
@@ -476,7 +493,7 @@ void EquivalenceChecker::checkPeqS()
 
 /**Function*************************************************************
 
-  Synopsis    [Print the final result]
+  Synopsis    [Print the equivalence checking result.]
 
   Description []
 
@@ -487,16 +504,18 @@ void EquivalenceChecker::checkPeqS()
 ***********************************************************************/
 void EquivalenceChecker::printResult() const
 {
-    std::cout << "  #Qubits: " << _n << std::endl;
-    if(_eqType != EqType::Feq) std::cout << "  #Input Qubits: " << _nQin << std::endl;
-    if(_eqType != EqType::Feq) std::cout << "  #Output Qubits: " << _nQout << std::endl;
-    std::cout << "  Gatecount of circuit1 : " << _gates[0].size() << std::endl;
-    std::cout << "  Gatecount of circuit2: " << _gates[1].size() << std::endl;
-    printf("  |circuit2|/|circuit1|: %.2f\n", ((double) _gates[1].size()) / ((double) _gates[0].size()));
-    if(_eqType == EqType::Feq) std::cout << "  Is equivalent? ";
-    else std::cout << "  Is partially equivalent? ";
+    std::cout << "{\n";
+    std::cout << "\t#Qubits (n): " << _n << '\n';
+    if(_eqType != EqType::Feq) std::cout << "\t#Data qubits (d): " << _nQin << '\n';
+    if(_eqType != EqType::Feq) std::cout << "\t#Measured qubits (m): " << _nQout << '\n';
+    std::cout << "\tGatecount of circuit1: " << _gates[0].size() << '\n';
+    std::cout << "\tGatecount of circuit2: " << _gates[1].size() << '\n';
+    printf("\t|circuit2|/|circuit1|: %.2f\n", ((double) _gates[1].size()) / ((double) _gates[0].size()));
+    if(_eqType == EqType::Feq) std::cout << "\tIs equivalent? ";
+    else std::cout << "\tIs partially equivalent? ";
     if (_isEq) std::cout << "Yes" << std::endl;
     else std::cout << "No" << std::endl;
+    std::cout << "}\n";
 }
 
 /**Function*************************************************************
@@ -512,8 +531,9 @@ void EquivalenceChecker::printResult() const
 ***********************************************************************/
 void EquivalenceChecker::printInfo(double runtime, size_t memPeak) const
 {
-    std::cout << "  Runtime: " << runtime << " seconds" << std::endl;
-    std::cout << "  Peak memory usage: " << memPeak << " bytes" << std::endl; //unit in bytes
-    std::cout << "  Max #nodes: " << _nodeCount << std::endl;
-    std::cout << "  Integer bit size: " << _r << std::endl;
+    std::cout << '\n';
+    std::cout << "Runtime: " << runtime << " seconds\n";
+    std::cout << "Peak memory usage: " << memPeak << " bytes\n"; 
+    std::cout << "Max #Nodes: " << _nodeCount << '\n';
+    std::cout << "Integer bit size: " << _r << std::endl;
 }

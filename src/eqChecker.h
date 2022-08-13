@@ -1,5 +1,5 @@
-#ifndef _PEQCHECKER_H_
-#define _PEQCHECKER_H_
+#ifndef _EQCHECKER_H_
+#define _EQCHECKER_H_
 
 #include "bddSystem.h"
 
@@ -7,7 +7,7 @@ enum class EqType
 { 
     Feq, // Full equivalence 
     Peq, // Partial equivalence 
-    PeqS // Partial equivalence Special
+    PeqS // Partial equivalence Special case
 };
 
 class EquivalenceChecker : public BDDSystem
@@ -35,13 +35,13 @@ public:
     void printInfo(double runtime, size_t memPeak) const;
 
 private:
-    std::vector<std::vector<GateType> > _gates;             // gates in circuits. [nCircuit]*[#gate]
-    std::vector<std::vector<std::vector<int> > > _qubits;   // ith qubits of gates in circuits. [nCircuit]*[#gates]*[#qubits]
-    int _nQin;                                              // #data qubits (d in the paper)
-    int _nQout;                                             // #measured qubits (m in the paper)     
+    std::vector<std::vector<GateType>> _gates;              // gates in circuits. [nCircuit]*[#gate]
+    std::vector<std::vector<std::vector<int>>> _qubits;     // ith qubits of gates in circuits. [nCircuit]*[#gates]*[#qubits]
+    int _nQin;                                              // #data qubits. (d in the paper)
+    int _nQout;                                             // #measured qubits. (m in the paper)     
     int _ratio;                                             // gate count ratio. |circuit2|/|circuit1|
     bool _isEq;                                             // if the result is equivalent or not.
-    EqType _eqType;                                         // the equivalence type (Feq/Peq/PeqS)  
+    EqType _eqType;                                         // the equivalence checking type (Feq/Peq/PeqS)  
 
     void invertCircuit(std::vector<GateType> &gate);
     void init();

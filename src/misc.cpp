@@ -2,7 +2,7 @@
 
 /**Function*************************************************************
 
-  Synopsis    [initialize BDD manager and zero node]
+  Synopsis    [Initialize BDD manager/_zeroNode/_identityNode.]
 
   Description []
 
@@ -21,7 +21,7 @@ void BDDSystem::ddInitialize()
 
 /**Function*************************************************************
 
-  Synopsis    [initialize an identity matrix represented by BDDs]
+  Synopsis    [Initialize an identity matrix represented by BDDs.]
 
   Description []
 
@@ -99,7 +99,7 @@ void BDDSystem::initIdentity()
 
 /**Function*************************************************************
 
-  Synopsis    [allocate new BDDs for each integer vector]
+  Synopsis    [Allocate new BDDs for each integer vector.]
 
   Description []
 
@@ -145,7 +145,7 @@ void BDDSystem::allocBDD(DdNode ***Bdd, bool extend)
 
 /**Function*************************************************************
 
-  Synopsis    [detect overflow in integer vectors]
+  Synopsis    [Detect overflow in integer vectors.]
 
   Description []
 
@@ -181,7 +181,7 @@ int BDDSystem::overflow3(DdNode *g, DdNode *h, DdNode *crin) const
 
 /**Function*************************************************************
 
-  Synopsis    [detect overflow in integer vectors -- for the case that h is 0]
+  Synopsis    [Detect overflow in integer vectors -- for the case that h is 0.]
 
   Description []
 
@@ -209,7 +209,7 @@ int BDDSystem::overflow2(DdNode *g, DdNode *crin) const
 
 /**Function*************************************************************
 
-  Synopsis    [update max #nodes]
+  Synopsis    [Update max #nodes.]
 
   Description []
 

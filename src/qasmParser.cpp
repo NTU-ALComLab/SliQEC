@@ -11,7 +11,7 @@
 
   Synopsis    [parse QASM file and store information into gate/qubit/n]
 
-  Description [return the number of qubits]
+  Description []
 
   SideEffects []
 

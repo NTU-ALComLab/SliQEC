@@ -1,4 +1,6 @@
 #include <boost/program_options.hpp>
+#include <sys/time.h> 
+#include <fstream>
 
 #include "eqChecker.h"
 #include "memMeasure.h"
