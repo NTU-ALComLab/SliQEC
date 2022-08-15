@@ -1,4 +1,4 @@
-# SliQEQ - A BDD-based Quantum Circuit Equivalence Checker
+# SliQEC - A BDD-based Quantum Circuit Equivalence Checker
 
 ## Introduction
 `SliQEC` is a BDD-based quantum circuit equivalence checker implemented in C/C++ on top of [CUDD](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddIntro.html) package. 
@@ -50,6 +50,25 @@ Peak memory usage: 12881920 bytes
 ```
 
 #### Partial Equivalence Checking
+For conducting partial equivalence checking on [examples/PEC/period_finding_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/PEC/period_finding_1.qasm) and [examples/PEC/period_finding_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/PEC/period_finding_2.qasm) with 3 data qubits and 3 measured qubits, execute:
+``` commandline
+./SliQEC --p 1 --circuit1 examples/PEC/period_finding_1.qasm --circuit2 examples/PEC/period_finding_2.qasm --nQd 3 --nQm 3
+```
+Then the results will be shown:
+``` 
+{
+        #Qubits (n): 8
+        #Data qubits (d): 3
+        #Measured qubits (m): 3
+        Gatecount of circuit1: 395
+        Gatecount of circuit2: 437
+        Is partially equivalent? Yes
+}
+
+Runtime: 1.86163 seconds
+Peak memory usage: 14553088 bytes
+```
+
 ## Citation
 
 ## Contact
