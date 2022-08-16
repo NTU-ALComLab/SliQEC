@@ -12,7 +12,7 @@ $ make
 ```
 
 ## Execution
-The circuit format being checked is `OpenQASM` used by IBM's [Qiskit](https://github.com/Qiskit/qiskit), and our supported gate set now contains Pauli-X, Pauli-Y, Pauli-Z, Hadamard, Phase and its inverse, π/8 and its inverse, Rotation-X with phase π/2, Rotation-Y with phase π/2, Controlled-NOT, Controlled-Z, Toffoli, SWAP, and Fredkin.
+The circuit format being checked is `OpenQASM` used by IBM's [Qiskit](https://github.com/Qiskit/qiskit), and our supported gate set now contains Pauli-X, Pauli-Y, Pauli-Z, Hadamard, Phase and its inverse, π/8 and its inverse, Rotation-X with phase π/2, Rotation-Y with phase π/2, Controlled-NOT, Controlled-Z, Toffoli, SWAP, and Fredkin. One can find some example benchmarks in [examples](https://github.com/NTU-ALComLab/SliQEC/tree/main/examples) folder.
 
 The help message concludes the details for execution:
 
@@ -70,6 +70,9 @@ Peak memory usage: 14553088 bytes
 ```
 
 ## Citation
+<summary>
+C.-Y. Wei, Y.-H. Tsai, C. -S. Jhang, and J.-H. R. Jiang, “Accurate BDD-based Unitary Operator Manipulation for Scalable and Robust Quantum Circuit Verification.” In Proceedings of the <em>Design Automation Conference (DAC)</em>, 2022.
+</summary>
 
 ## Contact
 If you have any questions or suggestions, feel free to [create an issue](https://github.com/NTU-ALComLab/SliQEC/issues), or contact us.
