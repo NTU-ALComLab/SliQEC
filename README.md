@@ -34,7 +34,7 @@ Options:
 #### Full Equivalence Checking
 For conducting full equivalence checking on [examples/FEC/bv_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_1.qasm) and [examples/FEC/bv_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_2.qasm), execute:
 ``` commandline
-./SliQEC --circuit1 examples/FEC/bv_1.qasm --circuit2 examples/FEC/bv_2.qasm
+$ ./SliQEC --circuit1 examples/FEC/bv_1.qasm --circuit2 examples/FEC/bv_2.qasm
 ```
 Then the results will be shown:
 ``` 
@@ -52,7 +52,7 @@ Peak memory usage: 12881920 bytes
 #### Partial Equivalence Checking
 For conducting partial equivalence checking on [examples/PEC/period_finding_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/PEC/period_finding_1.qasm) and [examples/PEC/period_finding_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/PEC/period_finding_2.qasm) with 3 data qubits and 3 measured qubits, execute:
 ``` commandline
-./SliQEC --p 1 --circuit1 examples/PEC/period_finding_1.qasm --circuit2 examples/PEC/period_finding_2.qasm --nQd 3 --nQm 3
+$ ./SliQEC --p 1 --circuit1 examples/PEC/period_finding_1.qasm --circuit2 examples/PEC/period_finding_2.qasm --nQd 3 --nQm 3
 ```
 Then the results will be shown:
 ``` 
@@ -71,7 +71,9 @@ Peak memory usage: 14553088 bytes
 
 ## Citation
 <summary>
-C.-Y. Wei, Y.-H. Tsai, C. -S. Jhang, and J.-H. R. Jiang, “Accurate BDD-based Unitary Operator Manipulation for Scalable and Robust Quantum Circuit Verification.” In Proceedings of the <em>Design Automation Conference (DAC)</em>, 2022.
+C.-Y. Wei, Y.-H. Tsai, C. -S. Jhang, and J.-H. R. Jiang, “Accurate BDD-based Unitary Operator Manipulation for Scalable and Robust Quantum Circuit Verification,” in Proceedings of the <em>Design Automation Conference (DAC)</em>, 2022.
+<summary>
+T.-F. Chen, J.-H. R. Jiang, and M.-H. Hsieh, “Partial Equivalence Checking of Quantum Circuits,” in Proceedings of the <em>International Conference on Quantum Computing and Engineering (QCE)</em>, 2022.
 </summary>
 
 ## Contact
