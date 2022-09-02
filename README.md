@@ -3,7 +3,7 @@
 ## Introduction
 `SliQEC` is a BDD-based quantum circuit equivalence checker implemented in C/C++ on top of [CUDD](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddIntro.html) package. 
 The concerned equivalence checking problem includes the full equivalence checking and partial equivalence checking.
-For more details about problem formulations and theories, please refer to the [papers](##Citation).
+For more details about problem formulations and theories, please refer to the [Citation](##Citation).
 
 ## Build
 To build the checker, type the command at the root directory.
@@ -71,7 +71,8 @@ Peak memory usage: 14553088 bytes
 
 ## Citation
 <summary>
-C.-Y. Wei, Y.-H. Tsai, C. -S. Jhang, and J.-H. R. Jiang, “Accurate BDD-based Unitary Operator Manipulation for Scalable and Robust Quantum Circuit Verification,” in Proceedings of the <em>Design Automation Conference (DAC)</em>, 2022.
+    <a href="https://doi.org/10.1145/3489517.3530481">C.-Y. Wei, Y.-H. Tsai, C. -S. Jhang, and J.-H. R. Jiang, “Accurate BDD-based Unitary Operator Manipulation for Scalable and Robust Quantum Circuit Verification,” in Proceedings of the <em>Design Automation Conference (DAC)</em>, 2022, pp. 523-528. </a>
+</summary>
 <summary>
 T.-F. Chen, J.-H. R. Jiang, and M.-H. Hsieh, “Partial Equivalence Checking of Quantum Circuits,” in Proceedings of the <em>International Conference on Quantum Computing and Engineering (QCE)</em>, 2022.
 </summary>
