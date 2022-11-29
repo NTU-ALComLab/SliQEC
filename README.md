@@ -74,7 +74,7 @@ Peak memory usage: 14553088 bytes
     <a href="https://doi.org/10.1145/3489517.3530481">C.-Y. Wei, Y.-H. Tsai, C. -S. Jhang, and J.-H. R. Jiang, “Accurate BDD-based Unitary Operator Manipulation for Scalable and Robust Quantum Circuit Verification,” in Proceedings of the <em>Design Automation Conference (DAC)</em>, 2022, pp. 523-528. </a>
 </summary>
 <summary>
-T.-F. Chen, J.-H. R. Jiang, and M.-H. Hsieh, “Partial Equivalence Checking of Quantum Circuits,” in Proceedings of the <em>International Conference on Quantum Computing and Engineering (QCE)</em>, 2022.
+    <a href="https://doi.org/10.1109/QCE53715.2022.00082">T.-F. Chen, J.-H. R. Jiang, and M.-H. Hsieh, “Partial Equivalence Checking of Quantum Circuits,” in Proceedings of the <em>International Conference on Quantum Computing and Engineering (QCE)</em>, 2022, pp. 594-604. </a>
 </summary>
 
 ## Contact
