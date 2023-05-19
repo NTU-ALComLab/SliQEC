@@ -6,7 +6,13 @@ The concerned equivalence checking problem includes the full equivalence checkin
 For more details about problem formulations and theories, please refer to the [Citation](##Citation).
 
 ## Build
-To build the checker, type the command at the root directory.
+First configure CUDD:
+```
+cd cudd
+./configure --enable-dddmp --enable-obj --enable-shared --enable-static
+cd ..
+``
+Then build the checker, type the command at the root directory.
 ```
 $ make
 ```
