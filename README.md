@@ -11,7 +11,7 @@ First configure CUDD:
 cd cudd
 ./configure --enable-dddmp --enable-obj --enable-shared --enable-static
 cd ..
-``
+```
 Then build the checker, type the command at the root directory.
 ```
 $ make
