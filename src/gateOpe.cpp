@@ -963,7 +963,6 @@ void BDDSystem::PauliZ(int ithCircuit, std::vector<int> iqubit)
             Cudd_Ref(term1);
             term2 = Cudd_Not(_allBDD[ithCircuit][i][j]);
             Cudd_Ref(term2);
-            Cudd_RecursiveDeref(_ddManager, _allBDD[ithCircuit][i][j]);
             tmp = Cudd_bddAnd(_ddManager, term2, qubit_and);
             Cudd_Ref(tmp);
             Cudd_RecursiveDeref(_ddManager, term2);
@@ -973,15 +972,16 @@ void BDDSystem::PauliZ(int ithCircuit, std::vector<int> iqubit)
             Cudd_RecursiveDeref(_ddManager, term1);
             Cudd_RecursiveDeref(_ddManager, term2);
 
-			// Detect overflow
-			if ((j == _r - 1) && !overflow_done)
-				if (overflow2(inter, c))
-				{
-					_r += _inc;
-					for (int indexOfCircuit = 0; indexOfCircuit < _nCircuit; indexOfCircuit++)   // each BDD of each circuit should be extend together
-						allocBDD(_allBDD[indexOfCircuit], true); // add new BDDs
-					overflow_done = 1;
-				}
+      			// Detect overflow
+      			if ((j == _r - 1) && !overflow_done)
+        				if (overflow2(inter, c))
+        				{
+        					_r += _inc;
+        					for (int indexOfCircuit = 0; indexOfCircuit < _nCircuit; indexOfCircuit++)   // each BDD of each circuit should be extend together
+        						allocBDD(_allBDD[indexOfCircuit], true); // add new BDDs
+        					overflow_done = 1;
+        				}
+            Cudd_RecursiveDeref(_ddManager, _allBDD[ithCircuit][i][j]);
 
             // Plus 1
             if (c == Cudd_Not(Cudd_ReadOne(_ddManager)))
