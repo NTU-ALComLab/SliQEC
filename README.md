@@ -35,7 +35,7 @@ Options:
   --nQd arg (=0)        (only for --p 1) the number of data qubits.
   --nQm arg (=0)        (only for --p 1) the number of measured qubits.
 ```
-
+For partial equivalence checking, please note that we assume the data qubits are located at q[0] to q[nQd-1], and the measured qubits are located at q[0] to q[nQm-1]. This assumption is made without loss of generality, as swap gates can be used to adjust their positions if needed.
 ## Example
 #### Full Equivalence Checking
 For conducting full equivalence checking on [examples/FEC/bv_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_1.qasm) and [examples/FEC/bv_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_2.qasm), execute:
