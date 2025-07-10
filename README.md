@@ -31,11 +31,29 @@ Options:
   --circuit1 arg        1st circuit for equivalence checking.
   --circuit2 arg        2nd circuit for equivalence checking.
   --p arg (=0)          conduct full or partial equivalence checking.
-                        0: full 1: partial
-  --nQd arg (=0)        (only for --p 1) the number of data qubits.
-  --nQm arg (=0)        (only for --p 1) the number of measured qubits.
+                        0: full 
+                        1: strong partial
+                        2: unweighted zero-clean-ancilla strong partial
+                        3: constant-probability weak partial
+  --nQd arg (=0)        (only for --p 1/2/3) #data qubits.
+  --nQkc arg (=0)       (only for --p 1/3)   #clean ancilla qubits.
+  --nQkd arg (=0)       (only for --p 1/2/3) #dirty ancilla qubits.
+  --nQm arg (=0)        (only for --p 1/2/3) #measured qubits.
+  --nQw arg (=0)        (only for --p 1/3)   #weighted qubits.
+  --nQp arg (=0)        (only for --p 1/2/3) #propagating qubits.
+  --nQg arg (=0)        (only for --p 1/2/3) #garbage qubits.
+  --nQkr arg (=0)       (only for --p 1/3)   #reverted clean ancilla qubits.
+  --careSet arg         (only for --p 1/2/3) the care set of the circuits.
+                        Can be omitted if the care set is the universal set.
+  --weightFun1 arg      (only for --p 1/2/3 and nQw > 0)the weight function of
+                        the 1st circuit
+  --weightFun2 arg      (only for --p 1/2/3 and nQw > 0)the weight function of
+                        the 2nd circuit
 ```
-For partial equivalence checking, please note that we assume the data qubits are located at q[0] to q[nQd-1], and the measured qubits are located at q[0] to q[nQm-1]. This assumption is made without loss of generality, as swap gates can be used to adjust their positions if needed.
+
+For partial equivalence checking, please note that we assume the input qubits follow the order of data qubits -> clean ancilla qubits -> dirty ancilla qubits, and the output qubits follow the order of measured qubits -> weighted qubits -> propagating qubits -> garbage qubits -> reverted clean ancilla qubits -> dirty ancilla qubits. 
+This assumption is made without loss of generality, as swap gates can be used to adjust their positions if needed.
+
 ## Example
 #### Full Equivalence Checking
 For conducting full equivalence checking on [examples/FEC/bv_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_1.qasm) and [examples/FEC/bv_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/FEC/bv_2.qasm), execute:
@@ -58,21 +76,27 @@ Peak memory usage: 12881920 bytes
 #### Partial Equivalence Checking
 For conducting partial equivalence checking on [examples/PEC/period_finding_1.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/PEC/period_finding_1.qasm) and [examples/PEC/period_finding_2.qasm](https://github.com/NTU-ALComLab/SliQEC/blob/main/examples/PEC/period_finding_2.qasm) with 3 data qubits and 3 measured qubits, execute:
 ``` commandline
-$ ./SliQEC --p 1 --circuit1 examples/PEC/period_finding_1.qasm --circuit2 examples/PEC/period_finding_2.qasm --nQd 3 --nQm 3
+$ ./SliQEC --p 1 --circuit1 examples/PEC/period_finding_1.qasm --circuit2 examples/PEC/period_finding_2.qasm --nQd 3 --nQm 3 --nQkc 5 --nQg 5
 ```
 Then the results will be shown:
 ``` 
 {
         #Qubits (n): 8
-        #Data qubits (d): 3
-        #Measured qubits (m): 3
+        #Data qubits (n_d):                    3
+        #Clean ancilla qubits (n_kc):          5
+        #Dirty ancilla qubits (n_kd):          0
+        #Measured qubits (n_m):                3
+        #Weighted qubits (n_w):                0
+        #Propagating qubits (n_p):             0
+        #Garbage qubits (n_g):                 5
+        #Reverted clean ancilla qubits (n_kr): 0
         Gatecount of circuit1: 395
         Gatecount of circuit2: 437
-        Is partially equivalent? Yes
+        Is strongly partially equivalent? Yes
 }
 
-Runtime: 1.86163 seconds
-Peak memory usage: 14553088 bytes
+Runtime: 0.638659 seconds
+Peak memory usage: 14987264 bytes
 ```
 
 ## Citation

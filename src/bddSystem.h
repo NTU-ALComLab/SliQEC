@@ -21,7 +21,7 @@ friend class EquivalenceChecker;
 public:
     BDDSystem(int nCircuit, bool isReorder)
     :   _ddManager(nullptr), _allBDD(nullptr), _zeroNode(nullptr), _identityNode(nullptr),
-        _k(0), _nCircuit(nCircuit), _n(0), _r(32), _w(4), _inc(3), _isReorder(isReorder), _nodeCount(0)
+        _k(0), _nCircuit(nCircuit), _n(0), _r(4), _w(4), _inc(3), _isReorder(isReorder), _nodeCount(0)
     {}
 
     ~BDDSystem()  
@@ -35,8 +35,8 @@ public:
     void Hadamard(int ithCircuit, int iqubit);
     void rx_pi_2(int ithCircuit, int iqubit, bool dagger);
     void ry_pi_2(int ithCircuit, int iqubit, bool tanspose);
-    void Phase_shift(int ithCircuit, int phase, int iqubit); // phase can only be 2 to the power of an integer
-    void Phase_shift_dagger(int ithCircuit, int phase, int iqubit);
+    void Controlled_Phase_shift(int ithCircuit, int phase, std::vector<int> cont, std::vector<int> ncont); // phase can only be 2 to the power of an integer
+    void Controlled_Phase_shift_dagger(int ithCircuit, int phase, std::vector<int> cont, std::vector<int> ncont);
     void PauliX(int ithCircuit, int iqubit);
     void PauliY(int ithCircuit, int iqubit, bool transpose);
     void PauliZ(int ithCircuit, std::vector<int> iqubit); // Z or CZ
@@ -58,7 +58,7 @@ private:
     /* misc.cpp */
     void ddInitialize();
     void initIdentity();
-    void allocBDD(DdNode ***Bdd, bool extend);
+    void allocBDD(DdNode ***Bdd, int inc, bool extend);
     int overflow3(DdNode *g, DdNode *h, DdNode *crin) const;
     int overflow2(DdNode *g, DdNode *crin) const;
     void updateNodeCount();
@@ -80,9 +80,10 @@ private:
             delete[] _allBDD[i];
         }
         delete[] _allBDD;
-
         Cudd_Quit(_ddManager);
     };
 };
+
+// Hint: use Cudd_DebugCheck to locate which line(s) may cause the cuddGarbageCollect error
 
 #endif

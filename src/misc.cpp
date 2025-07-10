@@ -108,7 +108,7 @@ void BDDSystem::initIdentity()
   SeeAlso     []
 
 ***********************************************************************/
-void BDDSystem::allocBDD(DdNode ***Bdd, bool extend)
+void BDDSystem::allocBDD(DdNode ***Bdd, int inc, bool extend)
 {
     DdNode *tmp;
 
@@ -116,7 +116,7 @@ void BDDSystem::allocBDD(DdNode ***Bdd, bool extend)
     for (int i = 0; i < _w; i++)
         W[i] = new DdNode *[_r];
 
-    for (int i = 0; i < _r - _inc; i++)
+    for (int i = 0; i < _r - inc; i++)
         for (int j = 0; j < _w; j++)
             W[j][i] = Bdd[j][i];
 
@@ -128,13 +128,13 @@ void BDDSystem::allocBDD(DdNode ***Bdd, bool extend)
 
     if (extend)
     {
-        for (int i = _r - _inc; i < _r; i++)
+        for (int i = _r - inc; i < _r; i++)
         {
             for (int j = 0; j < _w; j++)
             {
                 Bdd[j][i] = Cudd_ReadOne(_ddManager);
                 Cudd_Ref(Bdd[j][i]);
-                tmp = Cudd_bddAnd(_ddManager, Bdd[j][_r - _inc - 1], Bdd[j][i]);
+                tmp = Cudd_bddAnd(_ddManager, Bdd[j][_r - inc - 1], Bdd[j][i]);
                 Cudd_Ref(tmp);
                 Cudd_RecursiveDeref(_ddManager, Bdd[j][i]);
                 Bdd[j][i] = tmp;
