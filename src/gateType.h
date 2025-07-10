@@ -7,10 +7,10 @@ enum class GateType
     Y,              // Pauli-Y
     Z,              // Pauli-Z
     H,              // Hadamard
-    S,              // Phase 
-    SDG,            // Phase inverse
-    T,              // Pi/8
-    TDG,            // Pi/8 inverse
+    MCS,              // Phase 
+    MCSDG,            // Phase inverse
+    MCT,              // Pi/8
+    MCTDG,            // Pi/8 inverse
     RX_PI_2,        // Rotation-X Pi/2
     RX_PI_2_DG,     // Rotation-X Pi/2 inverse
     RY_PI_2,        // Rotation-Y Pi/2 

@@ -1,0 +1,4 @@
+( ( not q[1] ) and ( not q[2] ) ) or ( q[0] xor q[3] ) 
+1 2
+not ( ( ( not q[1] ) and ( not q[2] ) ) or ( q[0] xor q[3] ) ) 
+-1 2
