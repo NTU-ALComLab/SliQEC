@@ -35,9 +35,9 @@ int main(int argc, char **argv)
     ("nQkr", po::value<int>()->default_value(0), "(only for --p 1/3)   #reverted clean ancilla qubits.")
     ("careSet", po::value<std::string>()->default_value(""), "(only for --p 1/2/3) the care set of the circuits.\n"
                                                                "Can be omitted if the care set is the universal set.")
-    ("weightFun1", po::value<std::string>()->default_value(""), "(only for --p 1/2/3 and nQw > 0)"
+    ("weightFun1", po::value<std::string>()->default_value(""), "(only for --p 1/2/3 and nQw > 0) "
                                                                  "the weight function of the 1st circuit")
-    ("weightFun2", po::value<std::string>()->default_value(""), "(only for --p 1/2/3 and nQw > 0)"
+    ("weightFun2", po::value<std::string>()->default_value(""), "(only for --p 1/2/3 and nQw > 0) "
                                                                  "the weight function of the 2nd circuit")
     ;
 

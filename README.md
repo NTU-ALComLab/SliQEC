@@ -45,9 +45,9 @@ Options:
   --nQkr arg (=0)       (only for --p 1/3)   #reverted clean ancilla qubits.
   --careSet arg         (only for --p 1/2/3) the care set of the circuits.
                         Can be omitted if the care set is the universal set.
-  --weightFun1 arg      (only for --p 1/2/3 and nQw > 0)the weight function of
+  --weightFun1 arg      (only for --p 1/2/3 and nQw > 0) the weight function of
                         the 1st circuit
-  --weightFun2 arg      (only for --p 1/2/3 and nQw > 0)the weight function of
+  --weightFun2 arg      (only for --p 1/2/3 and nQw > 0) the weight function of
                         the 2nd circuit
 ```
 
@@ -97,6 +97,20 @@ Then the results will be shown:
 
 Runtime: 0.638659 seconds
 Peak memory usage: 14987264 bytes
+```
+
+For distributed quantum circuits, weight functions may be provided via *.weight* files.   
+A *.weight* file consists of a sequence of items, where each item is represented by two consecutive lines: the first line specifies a Boolean function, and the second line specifies its weight. The weight is given in the form of two integers $(a, k)$, representing the value $a \cdot 2^k$.   
+Files [Dis_original.qasm](PEC_benchmarks/Dis_original.qasm), [Dis_cut.qasm](PEC_benchmarks/Dis_cut.qasm), [Dis_original.weight](PEC_benchmarks/Dis_original.weight), and [Dis_cut.weight](PEC_benchmarks/Dis_cut.weight) in [PEC_benchmarks](PEC_benchmarks) provide an example, together with the corresponding tool usage commands.
+``` commandline
+./SliQEC --p 1 --circuit1 PEC_benchmarks/Dis_original.qasm --circuit2 PEC_benchmarks/Dis_cut.qasm --nQd 3 --nQkc 4 --nQkd 0 --nQm 0 --nQw 4 --nQp 3 --nQg 0 --nQkr 0 --weightFun1 PEC_benchmarks/Dis_original.weight --weightFun2 PEC_benchmarks/Dis_cut.weight
+```
+
+For dynamic quantum circuits, a care set may be provided via a *.careset* file.     
+A *.careset* file consists of a single line specifying a Boolean function, where an evaluated value of 1 indicates that the corresponding assignment is inside the care set.   
+Files [RUS_V3_1.qasm](PEC_benchmarks/RUS_V3_1.qasm), [RUS_V3_2.qasm](PEC_benchmarks/RUS_V3_2.qasm), and [RUS_V3.careset](PEC_benchmarks/RUS_V3.careset) in [PEC_benchmarks](PEC_benchmarks) provide an example, together with the corresponding tool usage commands.
+``` commandline
+./SliQEC --p 1 --circuit1 PEC_benchmarks/RUS_V3_1.qasm --circuit2 PEC_benchmarks/RUS_V3_2.qasm --nQd 1 --nQkc 2 --nQkd 0 --nQm 2 --nQw 0 --nQp 1 --nQg 0 --nQkr 0 --careSet PEC_benchmarks/RUS_V3.careset
 ```
 
 ## Citation
